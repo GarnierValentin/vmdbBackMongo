@@ -34,6 +34,33 @@ const movieController = {
                 message: 'Internal server error',
                 data: {}
             });
+        } 
+    },
+    async getTopRatedMovies(req, res) {
+        try {
+            await client.connect();
+            const db = client.db(dbName);
+            const collection = db.collection(collectionName);
+            const movies = await collection.find({
+                "imdb.rating": { $exists: true, $ne: null, $not: { $eq: "" } },
+                poster: { $exists: true, $ne: null }
+            })
+            .sort({ "imdb.rating": -1 })
+            .limit(10)
+            .toArray();
+    
+            res.status(200).send({
+                status: 'success',
+                message: 'Top rated movies found',
+                data: movies
+            });
+        } catch (err) {
+            console.log(err.stack);
+            res.status(500).send({
+                status: 'error',
+                message: 'Internal server error',
+                data: {}
+            });
         }
     }
 

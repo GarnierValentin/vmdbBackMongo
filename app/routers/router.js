@@ -8,5 +8,6 @@ router.get('/', (req, res) => {
 });
 
 router.get('/movie', movieController.getMoviesByTitle);
+router.get('/top-rated', movieController.getTopRatedMovies);
 
 export default router;

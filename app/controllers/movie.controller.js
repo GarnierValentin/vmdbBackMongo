@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import { MongoClient } from 'mongodb';
+import { MongoClient, ObjectId } from 'mongodb';
 
 const client = new MongoClient(process.env.URLDB);
 const dbName = process.env.DBNAME;
@@ -36,7 +36,7 @@ const movieController = {
             });
         } 
     },
-    async getTopRatedMovies(req, res) {
+    async getTopRatedMovies(_, res) {
         try {
             await client.connect();
             const db = client.db(dbName);
@@ -62,8 +62,44 @@ const movieController = {
                 data: {}
             });
         }
-    }
+    },
+    async getMovieById(req, res) {
+        try {
+            await client.connect();
+            const db = client.db(dbName);
+            const collection = db.collection(collectionName);
+            const movieId = req.params.id;
 
+            if (!ObjectId.isValid(movieId)) {
+                return res.status(400).send({
+                    status: 'error',
+                    message: 'Invalid movie ID'
+                });
+            }
+
+            const movie = await collection.findOne({ _id: new ObjectId(movieId) });
+
+            if (movie) {
+                res.status(200).send({
+                    status: 'success',
+                    message: 'Movie found',
+                    data: movie
+                });
+            } else {
+                res.status(404).send({
+                    status: 'error',
+                    message: 'Movie not found'
+                });
+            }
+        } catch (err) {
+            console.log(err.stack);
+            res.status(500).send({
+                status: 'error',
+                message: 'Internal server error',
+                data: {}
+            });
+        }
+    }
 }
 
 export default movieController;

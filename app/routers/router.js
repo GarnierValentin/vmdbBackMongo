@@ -10,5 +10,6 @@ router.get('/', (req, res) => {
 router.get('/movie', movieController.getMoviesByTitle);
 router.get('/top-rated', movieController.getTopRatedMovies);
 router.get('/movie/:id', movieController.getMovieById);
+router.get('/movie/:title', movieController.getMovieByTitle);
 
 export default router;

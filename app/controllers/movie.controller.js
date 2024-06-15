@@ -99,6 +99,36 @@ const movieController = {
                 data: {}
             });
         }
+    },
+    async getMovieByTitle(req, res) {
+        try {
+            await client.connect();
+            const db = client.db(dbName);
+            const collection = db.collection(collectionName);
+            const movieTitle = req.params.title;
+            let decodedMovieTitle = decodeURIComponent(movieTitle.toString());
+            const movie = await collection.findOne({ title: decodedMovieTitle });
+
+            if (movie) {
+                res.status(200).send({
+                    status: 'success',
+                    message: 'Movie found',
+                    data: movie
+                });
+            } else {
+                res.status(404).send({
+                    status: 'error',
+                    message: 'Movie not found'
+                });
+            }
+        } catch (err) {
+            console.log(err.stack);
+            res.status(500).send({
+                status: 'error',
+                message: 'Internal server error',
+                data: {}
+            });
+        }
     }
 }
 

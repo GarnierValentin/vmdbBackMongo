@@ -92,12 +92,10 @@ const movieController = {
                 data = data.concat(additionalMovies);
             }
 
-            const movieTitles = data.map(movie => movie.title);
-
             res.status(200).send({
                 status: 'success',
                 message: 'Movies found',
-                data: movieTitles,
+                data: data,
             });
         } catch (err) {
             console.log(err.stack);

@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import movieController from '../controllers/movie.controller.js';
+
 const router = Router();
 
 router.get('/', (req, res) => {

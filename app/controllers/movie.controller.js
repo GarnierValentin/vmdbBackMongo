@@ -6,36 +6,6 @@ const dbName = process.env.DBNAME;
 const collectionName = process.env.COLLECTIONNAME;
 
 const movieController = {
-    async getMoviesByTitle(req, res) {
-        try {
-            await client.connect();
-            const db = client.db(dbName);
-            const collection = db.collection(collectionName);
-            const movieTitle = req.query.title;
-            let decodedMovieTitle = decodeURIComponent(movieTitle.toString());
-            const movie = await collection.findOne({ title: decodedMovieTitle });
-
-            if (movie) {
-                res.status(200).send({
-                    status: 'success',
-                    message: 'Movie found',
-                    data: movie
-                });
-            } else {
-                res.status(404).send({
-                    status: 'error',
-                    message: 'Movie not found'
-                });
-            }
-        } catch (err) {
-            console.log(err.stack);
-            res.status(500).send({
-                status: 'error',
-                message: 'Internal server error',
-                data: {}
-            });
-        } 
-    },
     async getTopRatedMovies(_, res) {
         try {
             await client.connect();
@@ -45,10 +15,10 @@ const movieController = {
                 "imdb.rating": { $exists: true, $ne: null, $not: { $eq: "" } },
                 poster: { $exists: true, $ne: null }
             })
-            .sort({ "imdb.rating": -1 })
-            .limit(10)
-            .toArray();
-    
+                .sort({ "imdb.rating": -1 })
+                .limit(10)
+                .toArray();
+
             res.status(200).send({
                 status: 'success',
                 message: 'Top rated movies found',
@@ -100,27 +70,35 @@ const movieController = {
             });
         }
     },
-    async getMovieByTitle(req, res) {
+    async getMoviesByTitle(req, res) {
         try {
             await client.connect();
+
             const db = client.db(dbName);
             const collection = db.collection(collectionName);
-            const movieTitle = req.params.title;
-            let decodedMovieTitle = decodeURIComponent(movieTitle.toString());
-            const movie = await collection.findOne({ title: decodedMovieTitle });
+            const movieTitle = req.query.title;
 
-            if (movie) {
-                res.status(200).send({
-                    status: 'success',
-                    message: 'Movie found',
-                    data: movie
-                });
-            } else {
-                res.status(404).send({
-                    status: 'error',
-                    message: 'Movie not found'
-                });
+            let decodedMovieTitle = decodeURIComponent(movieTitle.toString());
+            const regex = new RegExp('^' + decodedMovieTitle, 'i');
+
+            const query = { title: { $regex: regex } };
+            let data = await collection.find(query).limit(8).toArray();
+
+            if (data.length < 8) {
+                const remainingMovies = 8 - data.length;
+                const regexPartialMatch = new RegExp(decodedMovieTitle, 'i');
+                const queryPartialMatch = { title: { $regex: regexPartialMatch } };
+                const additionalMovies = await collection.find(queryPartialMatch).limit(remainingMovies).toArray();
+                data = data.concat(additionalMovies);
             }
+
+            const movieTitles = data.map(movie => movie.title);
+
+            res.status(200).send({
+                status: 'success',
+                message: 'Movies found',
+                data: movieTitles,
+            });
         } catch (err) {
             console.log(err.stack);
             res.status(500).send({

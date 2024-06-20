@@ -7,9 +7,8 @@ router.get('/', (req, res) => {
     res.send('Server is running correctly');
 });
 
-router.get('/movie', movieController.getMoviesByTitle);
 router.get('/top-rated', movieController.getTopRatedMovies);
 router.get('/movie/:id', movieController.getMovieById);
-router.get('/movie/:title', movieController.getMovieByTitle);
+router.get('/movie', movieController.getMoviesByTitle);
 
 export default router;

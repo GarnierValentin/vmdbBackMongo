@@ -2,8 +2,8 @@ import 'dotenv/config';
 import { MongoClient, ObjectId } from 'mongodb';
 
 const client = new MongoClient(process.env.URLDB);
-const dbName = process.env.DBNAME;
-const collectionName = process.env.COLLECTIONNAME;
+const dbName = process.env.DBNAMEMOVIE;
+const collectionName = process.env.COLLECTIONNAMEMOVIE;
 
 const movieController = {
     async getTopRatedMovies(_, res) {

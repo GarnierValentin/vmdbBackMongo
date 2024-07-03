@@ -7,41 +7,74 @@ const client = new MongoClient(process.env.URLDB);
 const dbName = process.env.DBNAMEUSERS;
 const collectionName = process.env.COLLECTIONNAMEUSERS;
 
-const emailRegex = /(?:[a-z0-9!#$%&''*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&''*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])/;
-const passwordRegex = '^[a-fA-F0-9]{64}$';
-
 const usersController = {
     async registerUser(req, res) {
         try {
-            const { email, nickname, password } = req.body;
-
-            if (!email.match(emailRegex)) {
-                throw new Error(403); // Email invalide
-            }
-
-            if (!password.match(passwordRegex)) {
-                throw new Error(403); // Mot de passe invalide
-            }
-
             await client.connect();
-            const existingUser = await client.db(dbName).collection(collectionName).findOne({ email });
+
+            const db = client.db(dbName);
+            const collection = db.collection(collectionName);
+
+            const { nickname, email, password } = req.body;
+
+            const existingUser = await collection.findOne({ email });
 
             if (existingUser) {
-                throw new Error(403); // Utilisateur déjà existant
+                throw new Error(400);
             }
 
-            const result = await client.db(dbName).collection(collectionName).insertOne({ email, nickname, password });
-
-            res.status(201).send({
-                status: 'success',
-                message: 'Utilisateur enregistré',
-                data: result.insertedId
-            });
+            const result = await collection.insertOne({ nickname, email, password });
+            if (result.insertedId) {
+                res.status(201).json({
+                    status: 'success',
+                    message: 'User created'
+                });
+            } else {
+                throw new Error(500);
+            }
         } catch (err) {
             if (err.message > 399 && err.message < 500) {
                 res.status(err.message).send({
                     status: 'error',
                     message: 'Erreur client'
+                });
+            } else {
+                res.status(500).send({
+                    status: 'error',
+                    message: 'Erreur serveur'
+                });
+            }
+        }
+    },
+
+    async loginUser(req, res) {
+        try {
+            await client.connect();
+
+            const db = client.db(dbName);
+            const collection = db.collection(collectionName);
+
+            const { email, password } = req.body;
+
+            const hash = CryptoJS.SHA256(email + password).toString(CryptoJS.enc.Hex);
+
+            const user = await collection.findOne({ email, password: hash });
+
+            if (!user) {
+                throw new Error(401);
+            }
+
+            res.status(200).send({
+                status: 'success',
+                message: 'Connexion réussie',
+                data: user
+            });
+
+        } catch (err) {
+            if (err.message === '401') {
+                res.status(401).send({
+                    status: 'error',
+                    message: 'Email ou mot de passe incorrect'
                 });
             } else {
                 res.status(500).send({

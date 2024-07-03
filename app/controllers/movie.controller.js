@@ -2,15 +2,15 @@ import 'dotenv/config';
 import { MongoClient, ObjectId } from 'mongodb';
 
 const client = new MongoClient(process.env.URLDB);
-const dbName = process.env.DBNAMEMOVIE;
-const collectionName = process.env.COLLECTIONNAMEMOVIE;
+const dbMovie = process.env.DBNAMEMOVIE;
+const collectionMovie = process.env.COLLECTIONNAMEMOVIE;
 
 const movieController = {
     async getTopRatedMovies(_, res) {
         try {
             await client.connect();
-            const db = client.db(dbName);
-            const collection = db.collection(collectionName);
+            const db = client.db(dbMovie);
+            const collection = db.collection(collectionMovie);
             const movies = await collection.find({
                 "imdb.rating": { $exists: true, $ne: null, $not: { $eq: "" } },
                 poster: { $exists: true, $ne: null }
@@ -36,8 +36,8 @@ const movieController = {
     async getMovieById(req, res) {
         try {
             await client.connect();
-            const db = client.db(dbName);
-            const collection = db.collection(collectionName);
+            const db = client.db(dbMovie);
+            const collection = db.collection(collectionMovie);
             const movieId = req.params.id;
 
             if (!ObjectId.isValid(movieId)) {
@@ -74,8 +74,8 @@ const movieController = {
         try {
             await client.connect();
 
-            const db = client.db(dbName);
-            const collection = db.collection(collectionName);
+            const db = client.db(dbMovie);
+            const collection = db.collection(collectionMovie);
             const movieTitle = req.query.title;
 
             let decodedMovieTitle = decodeURIComponent(movieTitle.toString());

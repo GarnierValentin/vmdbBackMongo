@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import app from './app/index.app.js';
+import app from '../app/index.app.js';
 import { createServer } from 'node:http';
 // import { createServer } from 'node:https';
 // import fs from 'node:fs';

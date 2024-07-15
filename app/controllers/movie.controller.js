@@ -105,7 +105,43 @@ const movieController = {
                 data: {}
             });
         }
+    },
+    async getMoviesByGenre(req, res) {
+        try {
+            await client.connect();
+    
+            const db = client.db(dbMovie);
+            const collection = db.collection(collectionMovie);
+            const genre = req.params.genre;
+
+            console.log(genre);
+    
+            const query = {
+                genres: genre,
+                "imdb.rating": { $exists: true, $ne: null, $not: { $eq: "" } },
+                poster: { $exists: true, $ne: null }
+            };
+    
+            const data = await collection.find(query)
+                .sort({ "imdb.rating": -1 })
+                .limit(10)
+                .toArray();
+    
+            res.status(200).send({
+                status: 'success',
+                message: 'Movies found',
+                data: data
+            });
+        } catch (err) {
+            console.log(err.stack);
+            res.status(500).send({
+                status: 'error',
+                message: 'Internal server error',
+                data: {}
+            });
+        }
     }
+    
 }
 
 export default movieController;

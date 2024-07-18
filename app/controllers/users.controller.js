@@ -4,7 +4,10 @@ import {
 } from 'mongodb';
 import CryptoJS from 'crypto-js';
 
-const client = new MongoClient(process.env.URLDB);
+const client = new MongoClient(process.env.URLDB, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+});
 const dbName = process.env.DBNAMEUSERS;
 const collectionName = process.env.COLLECTIONNAMEUSERS;
 

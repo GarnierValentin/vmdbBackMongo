@@ -38,13 +38,13 @@ const inMemoryRateLimiter = (options) => {
 
 export const globalLimiter = inMemoryRateLimiter({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  limit: 200, // Limit each IP to 200 requests per window (here, per 15 minutes)
+  limit: 400, // Limit each IP to 400 requests per window (here, per 15 minutes)
   prefix: 'rl-global:',
 });
 
 export const loginLimiter = inMemoryRateLimiter({
   windowMs: 60 * 1000, // 1 minute
-  limit: 10, // Limit each IP to 10 requests per window (here, per 1 minute)
+  limit: 50, // Limit each IP to 10 requests per window (here, per 1 minute)
   prefix: 'rl-login:',
   handler: (request, response, next, options) => {
     if (request.rateLimit.current === request.rateLimit.limit + 1) {

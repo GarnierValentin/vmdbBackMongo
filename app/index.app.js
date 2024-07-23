@@ -7,6 +7,7 @@ import routerUsers from './routers/router.users.js';
 const app = express();
 
 app.use(cors());
+app.use(globalLimiter);
 app.use(express.json());
 app.use(routerMovie);
 app.use(routerUsers);

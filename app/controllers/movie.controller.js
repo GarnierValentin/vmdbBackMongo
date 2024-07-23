@@ -1,10 +1,7 @@
 import 'dotenv/config';
 import { MongoClient, ObjectId } from 'mongodb';
 
-const client = new MongoClient(process.env.URLDB, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-});
+const client = new MongoClient(process.env.URLDB);
 const dbMovie = process.env.DBNAMEMOVIE;
 const collectionMovie = process.env.COLLECTIONNAMEMOVIE;
 
